@@ -94,43 +94,6 @@ function App() {
   return (
     <div className="min-h-screen bg-hero-grid bg-[size:28px_28px]">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="surface-panel relative overflow-hidden px-5 py-5 shadow-glow sm:px-7">
-          <div className="absolute inset-0 bg-gradient-to-r from-hero-accent/10 via-transparent to-transparent" />
-          <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="field-label">Hero Software Style</p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight text-hero-accent sm:text-4xl">
-                {'Aufma\u00df'}
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm text-hero-muted sm:text-base">
-                {'Sprachgesteuerte Fl\u00e4chenerfassung f\u00fcr Handwerker mit editierbarer Tabelle,'}
-                mobiloptimierter Kartenansicht und vorbereitetem Export-Workflow.
-              </p>
-            </div>
-
-            <nav className="flex flex-wrap gap-3 text-sm font-semibold">
-              <a
-                href="#aufnahme"
-                className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-hero-text transition hover:border-hero-accent/40 hover:text-hero-accent"
-              >
-                Aufnahme
-              </a>
-              <a
-                href="#tabelle"
-                className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-hero-text transition hover:border-hero-accent/40 hover:text-hero-accent"
-              >
-                Tabelle
-              </a>
-              <button
-                type="button"
-                className="rounded-full bg-hero-accent px-4 py-2 text-[#191919] shadow-yellow transition hover:-translate-y-0.5 hover:brightness-105"
-              >
-                Export
-              </button>
-            </nav>
-          </div>
-        </header>
-
         <main className="flex-1 space-y-6 py-6">
           <div id="aufnahme">
             <MicButton
