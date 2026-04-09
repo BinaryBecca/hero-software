@@ -1,0 +1,43 @@
+import os
+
+import httpx
+from openai import AsyncOpenAI
+
+from models import MATERIALS, TranscriptionResult, MeasurementResult
+
+
+async def convert_speech_to_text(file_bytes: bytes, filename: str) -> TranscriptionResult:
+    stt_url = "https://api.elevenlabs.io/v1/speech-to-text"
+
+    headers = {
+        "xi-api-key": os.environ["ELEVENLABS_API_KEY"],
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            stt_url,
+            headers=headers,
+            files={"file": (filename, file_bytes)},
+            data={"model_id": "scribe_v1"},
+        )
+        response.raise_for_status()
+
+    return TranscriptionResult.model_validate(response.json())
+
+
+async def extract_measurements(transcript: str) -> MeasurementResult | None:
+    client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
+
+    response = await client.responses.parse(
+        model="gpt-5.4",
+        instructions=(
+            "Extract room measurements from the German transcript. "
+            "For each room, extract the name, length and width in meters, "
+            "and match the flooring material to the provided materials list by ID. "
+            "Include any additional comments mentioned for the room (e.g. extra materials needed)."
+        ),
+        input=f"Materials:\n{MATERIALS}\n\nTranscript:\n{transcript}",
+        text_format=MeasurementResult,
+    )
+
+    return response.output_parsed
