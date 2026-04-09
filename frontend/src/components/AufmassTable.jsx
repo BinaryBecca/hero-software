@@ -11,6 +11,14 @@ const calculateArea = (length, width) => {
   return parsedLength * parsedWidth;
 };
 
+const escapeHtml = (value) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
 function TrashIcon() {
   return (
     <svg
@@ -34,6 +42,200 @@ function TrashIcon() {
 
 function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
   const totalArea = rows.reduce((sum, row) => sum + calculateArea(row.length_m, row.width_m), 0);
+  const getMaterialLabel = (materialId) =>
+    materials.find((material) => String(material.id) === String(materialId))?.label ?? '';
+
+  const handleExportPdf = () => {
+    const exportDate = new Date().toLocaleDateString('de-DE');
+    const tableRows =
+      rows.length > 0
+        ? rows
+            .map((row, index) => {
+              const area = calculateArea(row.length_m, row.width_m);
+
+              return `
+                <tr>
+                  <td class="nr">${index + 1}</td>
+                  <td>${escapeHtml(row.name || '-')}</td>
+                  <td class="num">${escapeHtml(row.length_m || '-')}</td>
+                  <td class="num">${escapeHtml(row.width_m || '-')}</td>
+                  <td>${escapeHtml(getMaterialLabel(row.material_id) || '-')}</td>
+                  <td class="num">${formatArea(area)} m&sup2;</td>
+                </tr>
+                ${
+                  row.comment
+                    ? `<tr class="comment-row"><td></td><td colspan="5"><span>Kommentar:</span> ${escapeHtml(row.comment)}</td></tr>`
+                    : ''
+                }
+              `;
+            })
+            .join('')
+        : '<tr><td colspan="6" class="empty">Keine Positionen vorhanden.</td></tr>';
+
+    const printWindow = window.open('', '_blank');
+
+    if (!printWindow) {
+      window.alert('PDF-Export konnte nicht geöffnet werden. Bitte Pop-ups für diese Seite erlauben.');
+      return;
+    }
+
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="de">
+        <head>
+          <meta charset="utf-8" />
+          <title>Aufmass Export</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 16mm;
+            }
+
+            * {
+              box-sizing: border-box;
+            }
+
+            body {
+              margin: 0;
+              color: #191919;
+              font-family: Arial, sans-serif;
+              font-size: 11px;
+              line-height: 1.45;
+            }
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+
+            .accent-line {
+              border-top: 3px solid #FFD700;
+              margin-bottom: 18px;
+            }
+
+            th {
+              background: #ffffff;
+              color: #000000;
+              border: 1px solid #000000;
+              font-size: 9px;
+              letter-spacing: 0.08em;
+              padding: 7px 6px;
+              text-align: left;
+              text-transform: uppercase;
+            }
+
+            td {
+              border: 1px solid #000000;
+              color: #000000;
+              padding: 7px 6px;
+              vertical-align: top;
+            }
+
+            tbody tr:nth-child(4n + 1),
+            tbody tr:nth-child(4n + 2) {
+              background: #ffffff;
+            }
+
+            .nr {
+              width: 28px;
+              text-align: center;
+              font-weight: 700;
+            }
+
+            .num {
+              text-align: right;
+              white-space: nowrap;
+            }
+
+            .comment-row td {
+              color: #000000;
+              font-size: 10px;
+              padding-top: 5px;
+              padding-bottom: 5px;
+            }
+
+            .comment-row span {
+              color: #000000;
+              font-weight: 700;
+            }
+
+            .empty {
+              color: #000000;
+              padding: 24px;
+              text-align: center;
+            }
+
+            tfoot td {
+              background: #ffffff;
+              border-color: #000000;
+              color: #000000;
+              font-weight: 800;
+            }
+
+            .footer {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 20px;
+              margin-top: 28px;
+            }
+
+            .signature {
+              color: #000000;
+              font-size: 10px;
+            }
+
+            .line {
+              border-bottom: 1px solid #999;
+              height: 32px;
+              margin-top: 8px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="accent-line"></div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Nr.</th>
+                <th>Bezeichnung</th>
+                <th>L&auml;nge (m)</th>
+                <th>Breite (m)</th>
+                <th>Material</th>
+                <th>Messgehalt</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5" class="num">Gesamt</td>
+                <td class="num">${formatArea(totalArea)} m&sup2;</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div class="footer">
+            <div class="signature">
+              Aufgestellt
+              <div class="line"></div>
+            </div>
+            <div class="signature">
+              Anerkannt
+              <div class="line"></div>
+            </div>
+          </div>
+
+          <script>
+            window.addEventListener('load', function () {
+              window.focus();
+              window.print();
+            });
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
 
   return (
     <section id="tabelle" className="surface-panel overflow-hidden p-0">
@@ -57,6 +259,7 @@ function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
           </button>
           <button
             type="button"
+            onClick={handleExportPdf}
             className="rounded-lg border border-hero-accent/40 bg-hero-accent/10 px-4 py-2 text-sm font-bold text-hero-accent transition hover:bg-hero-accent/15"
           >
             Exportieren
@@ -183,7 +386,7 @@ function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
               <th className="w-36 border border-hero-border px-3 py-3">{'L\u00e4nge (m)'}</th>
               <th className="w-36 border border-hero-border px-3 py-3">Breite (m)</th>
               <th className="w-44 border border-hero-border px-3 py-3">Material</th>
-              <th className="w-36 border border-hero-border px-3 py-3 text-right">{'Me\u00dfgehalt (m\u00b2)'}</th>
+              <th className="w-40 border border-hero-border px-3 py-3 text-right">Messgehalt</th>
               <th className="w-20 border border-hero-border px-3 py-3 text-center" aria-label="Aktionen" />
             </tr>
           </thead>
@@ -201,28 +404,20 @@ function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
               rows.map((row, index) => {
                 const area = calculateArea(row.length_m, row.width_m);
 
-                return (
+                return [
                   <tr key={row.id} className="bg-white/[0.02] transition hover:bg-hero-accent/5">
-                    <td className="border border-hero-border px-3 py-2 text-center font-extrabold text-hero-accent">
+                    <td className="border-x border-t border-hero-border px-3 py-2 text-center font-extrabold text-hero-accent">
                       {index + 1}
                     </td>
-                    <td className="border border-hero-border px-3 py-2">
-                      <div className="grid gap-2">
+                    <td className="border-x border-t border-hero-border px-3 py-2">
                         <input
                           className="field-base rounded-lg px-3 py-2"
                           value={row.name}
                           onChange={(event) => onUpdateRow(row.id, 'name', event.target.value)}
                           placeholder="Bezeichnung"
                         />
-                        <input
-                          className="field-base rounded-lg px-3 py-2 text-xs"
-                          value={row.comment ?? ''}
-                          onChange={(event) => onUpdateRow(row.id, 'comment', event.target.value)}
-                          placeholder="Kommentar (optional)"
-                        />
-                      </div>
                     </td>
-                    <td className="border border-hero-border px-3 py-2">
+                    <td className="border-x border-t border-hero-border px-3 py-2">
                       <input
                         className="field-base rounded-lg px-3 py-2"
                         inputMode="decimal"
@@ -231,7 +426,7 @@ function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
                         placeholder="0.00"
                       />
                     </td>
-                    <td className="border border-hero-border px-3 py-2">
+                    <td className="border-x border-t border-hero-border px-3 py-2">
                       <input
                         className="field-base rounded-lg px-3 py-2"
                         inputMode="decimal"
@@ -240,7 +435,7 @@ function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
                         placeholder="0.00"
                       />
                     </td>
-                    <td className="border border-hero-border px-3 py-2">
+                    <td className="border-x border-t border-hero-border px-3 py-2">
                       <select
                         className="field-base rounded-lg px-3 py-2"
                         value={row.material_id}
@@ -254,10 +449,13 @@ function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
                         ))}
                       </select>
                     </td>
-                    <td className="border border-hero-border bg-hero-accent/10 px-3 py-2 text-right font-extrabold text-hero-accent">
-                      {formatArea(area)}
+                    <td className="border-x border-t border-hero-border bg-hero-accent/10 px-3 py-2">
+                      <div className="flex items-baseline justify-end gap-1.5 font-extrabold text-hero-accent">
+                        <span>{formatArea(area)}</span>
+                        <span className="text-xs font-bold text-hero-accent/80">{'m\u00b2'}</span>
+                      </div>
                     </td>
-                    <td className="border border-hero-border px-3 py-2 text-center">
+                    <td className="border-x border-t border-hero-border px-3 py-2 text-center">
                       <button
                         type="button"
                         onClick={() => onDeleteRow(row.id)}
@@ -267,8 +465,24 @@ function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
                         <TrashIcon />
                       </button>
                     </td>
-                  </tr>
-                );
+                  </tr>,
+                  <tr key={`${row.id}-comment`} className="bg-white/[0.02]">
+                    <td className="border-x border-b border-hero-border bg-hero-surfaceAlt/30 px-3 py-2" />
+                    <td className="border-x border-b border-hero-border bg-hero-surfaceAlt/30 px-3 py-2" colSpan="6">
+                      <div className="grid grid-cols-[auto_1fr] items-center gap-3">
+                        <span className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-hero-muted">
+                          Kommentar
+                        </span>
+                        <input
+                          className="field-base rounded-lg px-3 py-2 text-xs"
+                          value={row.comment ?? ''}
+                          onChange={(event) => onUpdateRow(row.id, 'comment', event.target.value)}
+                          placeholder="Kommentar (optional)"
+                        />
+                      </div>
+                    </td>
+                  </tr>,
+                ];
               })
             )}
           </tbody>
@@ -277,8 +491,11 @@ function AufmassTable({ rows, materials, onAddRow, onDeleteRow, onUpdateRow }) {
               <td className="border border-hero-border px-3 py-3 text-right font-extrabold" colSpan="5">
                 Gesamt
               </td>
-              <td className="border border-hero-border px-3 py-3 text-right font-extrabold">
-                {formatArea(totalArea)}
+              <td className="border border-hero-border px-3 py-3">
+                <div className="flex items-baseline justify-end gap-1.5 font-extrabold">
+                  <span>{formatArea(totalArea)}</span>
+                  <span className="text-xs font-bold text-hero-accent/80">{'m\u00b2'}</span>
+                </div>
               </td>
               <td className="border border-hero-border" />
             </tr>
