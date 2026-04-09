@@ -4,10 +4,10 @@ import MicButton from './components/MicButton';
 import Toast from './components/Toast';
 
 const materials = [
-  { id: 1, label: 'Parkett' },
-  { id: 2, label: 'Fliesen' },
-  { id: 3, label: 'Teppich' },
-  { id: 4, label: 'Laminat' },
+  { id: 1, label: 'PVC Bodenbelag' },
+  { id: 2, label: 'Vinyl Bodenbelag' },
+  { id: 3, label: 'Fliesen' },
+  { id: 4, label: 'Unbekannt' },
 ];
 
 let rowCounter = 0;
@@ -50,21 +50,22 @@ function App() {
     });
   };
 
-  const handleNewVoiceRow = (row) => {
-    setRows((currentRows) => [
-      ...currentRows,
+  const handleNewVoiceRows = (rooms) => {
+    const newRows = rooms.map((room) =>
       createEmptyRow({
-        ...row,
-        length_m: String(row.length_m ?? ''),
-        width_m: String(row.width_m ?? ''),
-        material_id: String(row.material_id ?? ''),
-        comment: row.comment ?? '',
+        ...room,
+        length_m: String(room.length_m ?? ''),
+        width_m: String(room.width_m ?? ''),
+        material_id: String(room.material_id ?? ''),
+        comment: room.comment ?? '',
       }),
-    ]);
+    );
+
+    setRows((currentRows) => [...currentRows, ...newRows]);
 
     showToast({
       type: 'success',
-      message: '\u2713 Eintrag hinzugef\u00fcgt',
+      message: `\u2713 ${newRows.length} ${newRows.length === 1 ? 'Eintrag' : 'Eintr\u00e4ge'} hinzugef\u00fcgt`,
     });
   };
 
@@ -99,7 +100,7 @@ function App() {
             <MicButton
               pipelineState={pipelineState}
               onStateChange={setPipelineState}
-              onNewRow={handleNewVoiceRow}
+              onNewRows={handleNewVoiceRows}
               onShowToast={showToast}
             />
           </div>

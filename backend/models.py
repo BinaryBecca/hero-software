@@ -7,6 +7,7 @@ MATERIALS = [
     {"id": 1, "name": "PVC Bodenbelag"},
     {"id": 2, "name": "Vinyl Bodenbelag"},
     {"id": 3, "name": "Fliesen"},
+    {"id": 4, "name": "Unbekannt"},
 ]
 
 

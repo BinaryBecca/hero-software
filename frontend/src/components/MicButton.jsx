@@ -1,29 +1,20 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-const delay = (ms) =>
-  new Promise((resolve) => {
-    window.setTimeout(resolve, ms);
+async function submitAudio(blob) {
+  const formData = new FormData();
+  formData.append('file', blob, 'recording.webm');
+
+  const response = await fetch('/process_audio', {
+    method: 'POST',
+    body: formData,
   });
 
-async function mockTranscribe() {
-  await delay(900);
-  return 'Wohnzimmer, 5 Meter lang, 4 Meter breit, Parkett';
-}
-
-async function mockExtractWithAI(transcript) {
-  await delay(900);
-
-  if (!transcript?.trim()) {
-    return null;
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Server error ${response.status}: ${detail}`);
   }
 
-  return {
-    name: 'Wohnzimmer',
-    length_m: 5.0,
-    width_m: 4.0,
-    material_id: 1,
-    comment: '',
-  };
+  return response.json();
 }
 
 function isValidRow(row) {
@@ -80,8 +71,20 @@ const statusLabels = {
   error: 'Fehler',
 };
 
-function MicButton({ pipelineState, onNewRow, onStateChange, onShowToast }) {
+function MicButton({ pipelineState, onNewRows, onStateChange, onShowToast }) {
   const processingRef = useRef(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+  // Cleanup: stop recording if component unmounts while recording
+  useEffect(() => {
+    return () => {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stream?.getTracks().forEach((t) => t.stop());
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, []);
 
   const stopRecordingAndProcess = useCallback(async () => {
     if (processingRef.current) {
@@ -92,21 +95,42 @@ function MicButton({ pipelineState, onNewRow, onStateChange, onShowToast }) {
     onStateChange('processing');
 
     try {
-      const transcript = await mockTranscribe();
-      const result = await mockExtractWithAI(transcript);
+      const blob = await new Promise((resolve, reject) => {
+        const recorder = mediaRecorderRef.current;
+        if (!recorder || recorder.state === 'inactive') {
+          reject(new Error('No active recording'));
+          return;
+        }
+        recorder.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: recorder.mimeType });
+          resolve(audioBlob);
+        };
+        recorder.stop();
+      });
 
-      if (isValidRow(result)) {
-        onNewRow(result);
-        onStateChange('done');
+      // Release microphone
+      mediaRecorderRef.current?.stream?.getTracks().forEach((t) => t.stop());
+      mediaRecorderRef.current = null;
+
+      const data = await submitAudio(blob);
+      const rooms = data.rooms ?? [];
+      const validRooms = rooms.filter(isValidRow);
+
+      if (validRooms.length === 0) {
+        onShowToast({
+          type: 'warning',
+          message: 'Eingabe nicht erkannt \u2013 bitte erneut sprechen',
+        });
+        onStateChange('error');
         return;
       }
 
-      onShowToast({
-        type: 'warning',
-        message: 'Eingabe nicht erkannt \u2013 bitte erneut sprechen',
-      });
-      onStateChange('error');
+      onNewRows(validRooms);
+      onStateChange('done');
     } catch (error) {
+      mediaRecorderRef.current?.stream?.getTracks().forEach((t) => t.stop());
+      mediaRecorderRef.current = null;
+
       onShowToast({
         type: 'warning',
         message: 'Eingabe nicht erkannt \u2013 bitte erneut sprechen',
@@ -115,19 +139,7 @@ function MicButton({ pipelineState, onNewRow, onStateChange, onShowToast }) {
     } finally {
       processingRef.current = false;
     }
-  }, [onNewRow, onShowToast, onStateChange]);
-
-  useEffect(() => {
-    if (pipelineState !== 'recording') {
-      return undefined;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      stopRecordingAndProcess();
-    }, 2200);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [pipelineState, stopRecordingAndProcess]);
+  }, [onNewRows, onShowToast, onStateChange]);
 
   const handleClick = async () => {
     if (pipelineState === 'processing') {
@@ -139,7 +151,29 @@ function MicButton({ pipelineState, onNewRow, onStateChange, onShowToast }) {
       return;
     }
 
-    onStateChange('recording');
+    // Start recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : 'audio/mp4';
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      onStateChange('recording');
+    } catch (err) {
+      onShowToast({
+        type: 'warning',
+        message: 'Mikrofon-Zugriff verweigert',
+      });
+      onStateChange('error');
+    }
   };
 
   const isRecording = pipelineState === 'recording';
