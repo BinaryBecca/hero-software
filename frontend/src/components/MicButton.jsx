@@ -195,7 +195,7 @@ function MicButton({ pipelineState, onNewRows, onStateChange, onShowToast }) {
       <button
         type="button"
         onClick={handleClick}
-        className={`group relative flex min-h-28 w-full items-center justify-center rounded-[2rem] border px-6 py-8 text-center transition duration-200 focus:outline-none focus:ring-4 focus:ring-hero-accent/20 sm:min-h-32 ${
+        className={`group relative flex min-h-28 w-full items-center justify-center overflow-hidden rounded-[2rem] border px-6 py-8 text-center transition duration-200 focus:outline-none focus:ring-4 focus:ring-hero-accent/20 sm:min-h-32 ${
           isRecording
             ? 'animate-pulseRing border-red-500 bg-red-500/10'
             : 'border-hero-accent/70 bg-gradient-to-r from-white/[0.03] to-hero-accent/10 hover:-translate-y-0.5 hover:shadow-yellow'
@@ -204,7 +204,7 @@ function MicButton({ pipelineState, onNewRows, onStateChange, onShowToast }) {
         aria-label={buttonLabel}
         title={buttonLabel}
       >
-        <div className="absolute inset-0 bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition group-hover:animate-shimmer group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-px rounded-[1.9rem] bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition group-hover:animate-shimmer group-hover:opacity-100" />
         <div
           className={`relative flex h-20 w-20 items-center justify-center rounded-full border sm:h-24 sm:w-24 ${
             isRecording
