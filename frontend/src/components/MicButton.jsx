@@ -23,7 +23,7 @@ function isValidRow(row) {
       row.name &&
       Number.isFinite(Number(row.length_m)) &&
       Number.isFinite(Number(row.width_m)) &&
-      Number(row.material_id) > 0,
+      row.material_id,
   );
 }
 

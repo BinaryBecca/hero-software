@@ -4,10 +4,10 @@ from pydantic import BaseModel, Field, field_validator
 
 
 MATERIALS = [
-    {"id": 1, "name": "PVC Bodenbelag"},
-    {"id": 2, "name": "Vinyl Bodenbelag"},
-    {"id": 3, "name": "Fliesen"},
-    {"id": 4, "name": "Unbekannt"},
+    {"id": "HA0ZWAOXoAA", "name": "PVC Bodenbelag"},
+    {"id": "HA0bFSoDsAA", "name": "Vinyl Bodenbelag"},
+    {"id": "HA0Z0--YIAA", "name": "Fliesen"},
+    {"id": "UNBEKANNT", "name": "Unbekannt"},
 ]
 
 
@@ -45,9 +45,9 @@ class Room(BaseModel):
         description="Room width in meters",
         examples=[4.15, 3.00],
     )
-    material_id: int = Field(
+    material_id: str = Field(
         description="ID of the material from the provided materials list",
-        examples=[1, 3],
+        examples=["HA0ZWAOXoAA", "PLACEHOLDER_FLIESEN"],
     )
     comment: str | None = Field(
         default=None,
@@ -68,7 +68,7 @@ class Room(BaseModel):
 
     @field_validator("material_id")
     @classmethod
-    def material_must_exist(cls, v: int) -> int:
+    def material_must_exist(cls, v: str) -> str:
         valid_ids = {m["id"] for m in MATERIALS}
         if v not in valid_ids:
             raise ValueError(f"material_id {v} not found in MATERIALS (valid: {valid_ids})")

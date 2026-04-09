@@ -4,10 +4,10 @@ import MicButton from './components/MicButton';
 import Toast from './components/Toast';
 
 const materials = [
-  { id: 1, label: 'PVC Bodenbelag' },
-  { id: 2, label: 'Vinyl Bodenbelag' },
-  { id: 3, label: 'Fliesen' },
-  { id: 4, label: 'Unbekannt' },
+  { id: 'HA0ZWAOXoAA', label: 'PVC Bodenbelag' },
+  { id: 'HA0bFSoDsAA', label: 'Vinyl Bodenbelag' },
+  { id: 'HA0Z0--YIAA', label: 'Fliesen' },
+  { id: 'UNBEKANNT', label: 'Unbekannt' },
 ];
 
 let rowCounter = 0;

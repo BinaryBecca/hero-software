@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
+from hero_client import create_document
 from models import MeasurementResult
 from services import convert_speech_to_text, extract_measurements
 
@@ -32,5 +33,22 @@ async def process_audio(file: UploadFile = File(...)):
 
     if result is None:
         raise HTTPException(status_code=422, detail="Could not extract measurements from audio")
-    
+
+    actions = [
+        {
+            "add_product_position_by_id": {
+                "product_id": room.material_id,
+                "quantity": float(room.area_m2),
+            }
+        }
+        for room in result.rooms
+        if room.material_id != "UNBEKANNT"
+    ]
+
+    await create_document(
+        document_type_id=1227309,
+        project_match_id=10049819,
+        actions=actions,
+    )
+
     return result
