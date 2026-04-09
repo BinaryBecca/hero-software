@@ -103,15 +103,7 @@ function MicButton({ pipelineState, onNewRow, onStateChange, onShowToast }) {
 
   return (
     <section className="surface-panel overflow-hidden p-5 shadow-glow sm:p-7">
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="field-label">Sprachaufnahme</p>
-          <h2 className="mt-2 text-2xl font-extrabold text-hero-text">{'Aufma\u00df per Sprache erfassen'}</h2>
-          <p className="mt-2 max-w-2xl text-sm text-hero-muted sm:text-base">
-            {'Ein Tipp startet die Aufnahme. Nach dem Stopp l\u00e4uft die Transkription und die KI-Extraktion'}
-            {' aktuell vollst\u00e4ndig als Mock.'}
-          </p>
-        </div>
+      <div className="mb-6 flex justify-end">
         <div className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-hero-muted">
           Status: {pipelineState}
         </div>
