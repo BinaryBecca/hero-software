@@ -1,9 +1,12 @@
+import logging
 import os
 
 import httpx
 from openai import AsyncOpenAI
 
 from models import MATERIALS, TranscriptionResult, MeasurementResult
+
+logger = logging.getLogger(__name__)
 
 
 async def convert_speech_to_text(file_bytes: bytes, filename: str) -> TranscriptionResult:
@@ -22,7 +25,9 @@ async def convert_speech_to_text(file_bytes: bytes, filename: str) -> Transcript
         )
         response.raise_for_status()
 
-    return TranscriptionResult.model_validate(response.json())
+    result = TranscriptionResult.model_validate(response.json())
+    logger.info("Transcribed text: %s", result.text)
+    return result
 
 
 async def extract_measurements(transcript: str) -> MeasurementResult | None:
@@ -40,4 +45,6 @@ async def extract_measurements(transcript: str) -> MeasurementResult | None:
         text_format=MeasurementResult,
     )
 
-    return response.output_parsed
+    result = response.output_parsed
+    logger.info("LLM extracted data: %s", result)
+    return result
