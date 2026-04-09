@@ -1,0 +1,11 @@
+[tools]
+python = "3.13.5"
+node = "22.14.0"
+zellij = "latest"
+
+[settings]
+python.uv_venv_auto = true
+
+[tasks.dev]
+description = "Start development environment"
+run = "zellij --layout dev.kdl"
