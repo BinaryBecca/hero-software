@@ -36,6 +36,50 @@ function isValidRow(row) {
   );
 }
 
+function MicIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-11 w-11"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.8"
+    >
+      <path d="M12 3.25a3.25 3.25 0 0 0-3.25 3.25v5a3.25 3.25 0 0 0 6.5 0v-5A3.25 3.25 0 0 0 12 3.25Z" />
+      <path d="M18.25 10.75a6.25 6.25 0 0 1-12.5 0" />
+      <path d="M12 17v3.75" />
+      <path d="M8.75 20.75h6.5" />
+    </svg>
+  );
+}
+
+function AnimatedDots({ tone = 'accent' }) {
+  const colorClass = tone === 'danger' ? 'bg-red-300' : 'bg-hero-accent';
+
+  return (
+    <span className="flex items-center justify-center gap-2" aria-hidden="true">
+      {[0, 1, 2].map((dot) => (
+        <span
+          key={dot}
+          className={`h-3 w-3 animate-bounce rounded-full ${colorClass}`}
+          style={{ animationDelay: `${dot * 140}ms` }}
+        />
+      ))}
+    </span>
+  );
+}
+
+const statusLabels = {
+  idle: 'Bereit',
+  recording: 'Aufnahme',
+  processing: 'Verarbeitung',
+  done: 'Fertig',
+  error: 'Fehler',
+};
+
 function MicButton({ pipelineState, onNewRow, onStateChange, onShowToast }) {
   const processingRef = useRef(false);
 
@@ -100,12 +144,17 @@ function MicButton({ pipelineState, onNewRow, onStateChange, onShowToast }) {
 
   const isRecording = pipelineState === 'recording';
   const isProcessing = pipelineState === 'processing';
+  const buttonLabel = isRecording
+    ? 'Aufnahme laeuft'
+    : isProcessing
+      ? 'Aufnahme wird verarbeitet'
+      : 'Aufnahme starten';
 
   return (
     <section className="surface-panel overflow-hidden p-5 shadow-glow sm:p-7">
       <div className="mb-6 flex justify-end">
         <div className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-hero-muted">
-          Status: {pipelineState}
+          Status: {statusLabels[pipelineState] ?? pipelineState}
         </div>
       </div>
 
@@ -118,35 +167,23 @@ function MicButton({ pipelineState, onNewRow, onStateChange, onShowToast }) {
             : 'border-hero-accent/70 bg-gradient-to-r from-white/[0.03] to-hero-accent/10 hover:-translate-y-0.5 hover:shadow-yellow'
         } ${isProcessing ? 'cursor-wait opacity-80' : ''}`}
         disabled={isProcessing}
+        aria-label={buttonLabel}
+        title={buttonLabel}
       >
         <div className="absolute inset-0 bg-[length:200%_100%] bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 transition group-hover:animate-shimmer group-hover:opacity-100" />
-        <div className="relative flex flex-col items-center gap-3">
-          <div
-            className={`flex h-16 w-16 items-center justify-center rounded-full border text-3xl ${
-              isRecording
-                ? 'border-red-400 bg-red-500/20 text-red-200'
-                : isProcessing
-                  ? 'border-hero-accent/50 bg-hero-accent/10 text-hero-accent'
-                  : 'border-hero-accent/60 bg-hero-accent/10 text-hero-accent'
-            }`}
-            aria-hidden="true"
-          >
-            {isProcessing ? '...' : '\u{1F3A4}'}
-          </div>
-          <div>
-            <p className="text-xl font-extrabold text-hero-text sm:text-2xl">
-              {isRecording
-                ? 'Aufnahme l\u00e4uft...'
-                : isProcessing
-                  ? 'Verarbeitung...'
-                  : 'Aufnahme starten'}
-            </p>
-            <p className="mt-2 text-sm text-hero-muted">
-              {isRecording
-                ? 'Zum direkten Verarbeiten erneut tippen oder kurz warten.'
-                : 'Beispiel: "Wohnzimmer, 5 Meter lang, 4 Meter breit, Parkett"'}
-            </p>
-          </div>
+        <div
+          className={`relative flex h-20 w-20 items-center justify-center rounded-full border sm:h-24 sm:w-24 ${
+            isRecording
+              ? 'border-red-400 bg-red-500/20 text-red-200'
+              : isProcessing
+                ? 'border-hero-accent/50 bg-hero-accent/10 text-hero-accent'
+                : 'border-hero-accent/60 bg-hero-accent/10 text-hero-accent'
+          }`}
+        >
+          <span className="sr-only">{buttonLabel}</span>
+          {isRecording ? <AnimatedDots tone="danger" /> : null}
+          {isProcessing ? <AnimatedDots /> : null}
+          {!isRecording && !isProcessing ? <MicIcon /> : null}
         </div>
       </button>
     </section>
