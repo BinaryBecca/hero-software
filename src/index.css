@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color: #ffffff;
+    background: #1a1a1a;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top, rgba(255, 215, 0, 0.08), transparent 30%),
+      linear-gradient(180deg, #1d1d1d 0%, #151515 100%);
+    color: #ffffff;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+}
+
+@layer utilities {
+  .surface-panel {
+    @apply rounded-3xl border border-hero-border bg-white/[0.03] backdrop-blur-sm;
+  }
+
+  .field-base {
+    @apply w-full rounded-2xl border border-hero-border bg-hero-surface px-4 py-3 text-sm text-hero-text outline-none transition duration-200 placeholder:text-hero-muted focus:border-hero-accent focus:ring-2 focus:ring-hero-accent/20;
+  }
+
+  .field-label {
+    @apply text-xs font-semibold uppercase tracking-[0.2em] text-hero-muted;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.24);
+  border-radius: 999px;
+}
