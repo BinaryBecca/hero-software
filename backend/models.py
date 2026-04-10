@@ -11,6 +11,8 @@ MATERIALS = [
     {"id": "UNBEKANNT", "name": "Unbekannt"}, # fallback if material is not identified from speech
 ]
 
+MATERIAL_NAME_BY_ID: dict[str, str] = {m["id"]: m["name"] for m in MATERIALS}
+
 
 class TranscriptionWord(BaseModel):
     text: str
@@ -78,3 +80,8 @@ class Room(BaseModel):
 
 class MeasurementResult(BaseModel):
     rooms: list[Room]
+
+
+class ProcessAudioResponse(BaseModel):
+    rooms: list[Room]
+    confirmation_audio_url: str | None = None
