@@ -16,7 +16,7 @@ Instead of writing measurements down manually, the user can speak rooms, dimensi
 
 ## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> What It Does
 
-The browser client captures spoken input with `MediaRecorder`, uploads the audio as `multipart/form-data`, and waits for a typed `rooms` response from the backend. FastAPI hands the audio to ElevenLabs for speech-to-text, passes the transcript plus the material catalog into OpenAI `gpt-5.4`, and receives validated room objects back as `MeasurementResult`. Those rooms are inserted into a responsive React table where users can review, correct, extend, and export the measurements. In parallel, the backend turns every recognized material except `UNBEKANNT` into HERO GraphQL document actions using the computed room area as quantity.
+The browser client captures spoken input with `MediaRecorder`, uploads the audio as `multipart/form-data`, and waits for a typed `rooms` response from the backend. FastAPI hands the audio to ElevenLabs for speech-to-text, passes the transcript plus the material catalog into OpenAI `gpt-5.4`, and receives validated room objects back as `MeasurementResult`. Those rooms are inserted into a responsive React table where users can review, correct, extend, and export the measurements. In parallel, the backend turns every recognized material into HERO GraphQL document actions using the computed room area as quantity.
 
 <p align="center">
   <img src="docs/screenshot-desktop.png" alt="Desktop screenshot" width="100%"/>
