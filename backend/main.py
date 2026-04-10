@@ -29,11 +29,15 @@ async def process_audio(file: UploadFile = File(...)):
     contents = await file.read()
     # TODO: move processing to background task, return task ID, create separate endpoints to get results
     transcription = await convert_speech_to_text(contents, file.filename)
-    result = await extract_measurements(transcription.text)
 
-    if result is None:
+    if not transcription.text.strip():
+        raise HTTPException(status_code=422, detail="Transcription returned empty text")
+
+    measurements = await extract_measurements(transcription.text)
+
+    if measurements is None:
         raise HTTPException(status_code=422, detail="Could not extract measurements from audio")
 
-    await create_quote_on_hero(result)
+    await create_quote_on_hero(measurements)
 
     return result
