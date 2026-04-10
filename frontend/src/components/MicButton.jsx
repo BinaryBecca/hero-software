@@ -127,6 +127,16 @@ function MicButton({ pipelineState, onNewRows, onStateChange, onShowToast }) {
 
       onNewRows(validRooms);
       onStateChange('done');
+
+      // Play confirmation audio if available
+      if (data.confirmation_audio_url) {
+        try {
+          const audio = new Audio(data.confirmation_audio_url);
+          await audio.play();
+        } catch (err) {
+          console.warn('Could not play confirmation audio:', err);
+        }
+      }
     } catch (error) {
       mediaRecorderRef.current?.stream?.getTracks().forEach((t) => t.stop());
       mediaRecorderRef.current = null;
