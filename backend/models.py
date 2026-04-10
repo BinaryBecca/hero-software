@@ -8,7 +8,7 @@ MATERIALS = [
     {"id": "HA0ZWAOXoAA", "name": "PVC Bodenbelag"},
     {"id": "HA0bFSoDsAA", "name": "Vinyl Bodenbelag"},
     {"id": "HA0Z0--YIAA", "name": "Fliesen"},
-    {"id": "UNBEKANNT", "name": "Unbekannt"},
+    {"id": "UNBEKANNT", "name": "Unbekannt"}, # fallback if material is not identified from speech
 ]
 
 
