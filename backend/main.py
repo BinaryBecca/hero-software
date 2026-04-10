@@ -40,4 +40,4 @@ async def process_audio(file: UploadFile = File(...)):
 
     await create_quote_on_hero(measurements)
 
-    return result
+    return measurements
