@@ -1,0 +1,23 @@
+layout {
+    pane split_direction="vertical" {
+        pane split_direction="horizontal" {
+            pane {
+                command "uv"
+                args "run" "fastapi" "dev"
+                cwd "backend"
+                name "FastAPI Backend"
+            }
+        }
+        pane split_direction="horizontal" {
+            pane {
+                command "npm"
+                args "run" "dev"
+                cwd "frontend"
+                name "React Frontend"
+            }
+        }
+    }
+    pane size=2 borderless=true {
+        plugin location="zellij:status-bar"
+    }
+}
