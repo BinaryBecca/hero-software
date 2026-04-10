@@ -48,7 +48,7 @@ class Room(BaseModel):
     )
     material_id: str = Field(
         description="ID of the material from the provided materials list",
-        examples=["HA0ZWAOXoAA", "PLACEHOLDER_FLIESEN"],
+        examples=["HA0ZWAOXoAA", "UNBEKANNT"],
     )
     comment: str | None = Field(
         default=None,
