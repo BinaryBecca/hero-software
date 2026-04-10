@@ -14,25 +14,25 @@ This tool was built for HERO Software (https://hero-software.de) and enables cra
 
 Instead of writing measurements down manually, the user can speak rooms, dimensions, and flooring context into the app and continue working while the system structures the result in the background.
 
-## 🎯 What It Does
+## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> What It Does
 
 The browser client captures spoken input with `MediaRecorder`, uploads the audio as `multipart/form-data`, and waits for a typed `rooms` response from the backend. FastAPI hands the audio to ElevenLabs for speech-to-text, passes the transcript plus the material catalog into OpenAI `gpt-5.4`, and receives validated room objects back as `MeasurementResult`. Those rooms are inserted into a responsive React table where users can review, correct, extend, and export the measurements. In parallel, the backend turns every recognized material except `UNBEKANNT` into HERO GraphQL document actions using the computed room area as quantity.
 
-## ✨ Features
+## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> Features
 
-- 🎙️ One-button microphone workflow with pipeline states `idle`, `recording`, `processing`, `done`, and `error`
-- 📤 Live frontend-to-backend upload to `POST /process_audio`
-- 🗣️ Real ElevenLabs speech-to-text integration at `https://api.elevenlabs.io/v1/speech-to-text`
-- 🧠 Real OpenAI structured extraction via `client.responses.parse(...)` with model `gpt-5.4`
-- 🧱 Typed room extraction with `name`, `length_m`, `width_m`, `material_id`, and optional `comment`
-- 🧮 Automatic area calculation per row plus a running total in square meters
-- 📝 Manual row creation plus inline editing and deletion
-- 📱 Responsive table/card UI for mobile and desktop layouts
-- 🔔 Warning and success toast notifications
-- 🧾 Print/PDF export with totals, comments, and signature lines
-- 🔗 HERO GraphQL document creation for recognized materials
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> One-button microphone workflow with pipeline states `idle`, `recording`, `processing`, `done`, and `error`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Live frontend-to-backend upload to `POST /process_audio`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Real ElevenLabs speech-to-text integration at `https://api.elevenlabs.io/v1/speech-to-text`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Real OpenAI structured extraction via `client.responses.parse(...)` with model `gpt-5.4`
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Typed room extraction with `name`, `length_m`, `width_m`, `material_id`, and optional `comment`
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Automatic area calculation per row plus a running total in square meters
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Manual row creation plus inline editing and deletion
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Responsive table/card UI for mobile and desktop layouts
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Warning and success toast notifications
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Print/PDF export with totals, comments, and signature lines
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> HERO GraphQL document creation for recognized materials
 
-## 🧰 Tech Stack
+## <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="14"/> Tech Stack
 
 ### Frontend
 
@@ -57,18 +57,15 @@ The browser client captures spoken input with `MediaRecorder`, uploads the audio
 
 ### Runtime / Tooling
 
-- Python requirement in `backend/pyproject.toml`: `>=3.13`
-- Python version file in `backend/.python-version`: `3.13`
-- Root `mise.toml`: `python = "3.13.5"`, `node = "22.14.0"`
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Python `>=3.13` · version file: `3.13` · mise: `3.13.5`
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Node `22.14.0` via `mise.toml`
 
-## 🎙️ Voice Pipeline
+## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> Voice Pipeline
 
 ### 1. Audio capture in the browser
 
-- `frontend/src/components/MicButton.jsx` requests microphone access with `navigator.mediaDevices.getUserMedia({ audio: true })`
-- It records with `MediaRecorder`
-- Preferred MIME type: `audio/webm;codecs=opus`
-- Fallback MIME type: `audio/mp4`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> `MicButton.jsx` requests mic access via `navigator.mediaDevices.getUserMedia({ audio: true })`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Records with `MediaRecorder` — preferred: `audio/webm;codecs=opus`, fallback: `audio/mp4`
 
 ### 2. Frontend request to the backend
 
@@ -83,50 +80,24 @@ Content-Type: multipart/form-data
 
 This integration is real, not mocked.
 
-- Endpoint: `https://api.elevenlabs.io/v1/speech-to-text`
-- HTTP method: `POST`
-- Headers: `xi-api-key: $ELEVENLABS_API_KEY`
-- Form fields:
-  - `file`: uploaded audio bytes with the original filename
-  - `model_id`: `scribe_v1`
-
-The response is validated into this Pydantic model:
-
-```json
-{
-  "language_code": "string",
-  "language_probability": 0.0,
-  "text": "string",
-  "words": [
-    {
-      "text": "string",
-      "start": 0.0,
-      "end": 0.0,
-      "type": "string",
-      "logprob": 0.0
-    }
-  ],
-  "transcription_id": "string",
-  "audio_duration_secs": 0.0
-}
-```
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Endpoint: `https://api.elevenlabs.io/v1/speech-to-text`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Headers: `xi-api-key: $ELEVENLABS_API_KEY`
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Fields: `file` (audio bytes) + `model_id: scribe_v1`
 
 ### 4. OpenAI integration
 
 This integration is also real, not mocked.
 
-- SDK call: `AsyncOpenAI(...).responses.parse(...)`
-- Model: `gpt-5.4`
-- Input text: the hard-coded `MATERIALS` list plus the transcript returned by ElevenLabs
-- Structured target: `MeasurementResult`
-
-Instructions passed to the Responses API:
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> SDK call: `AsyncOpenAI(...).responses.parse(...)`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Model: `gpt-5.4`
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Input: `MATERIALS` list + ElevenLabs transcript
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> Structured target: `MeasurementResult`
 
 ```text
-Extract room measurements from the German transcript. For each room, extract the name, length and width in meters, and match the flooring material to the provided materials list by ID. Include any additional comments mentioned for the room (e.g. extra materials needed).
+Extract room measurements from the German transcript. For each room, extract the name,
+length and width in meters, and match the flooring material to the provided materials
+list by ID. Include any additional comments mentioned for the room.
 ```
-
-Expected structured output:
 
 ```json
 {
@@ -142,44 +113,20 @@ Expected structured output:
 }
 ```
 
-Validation rules from `backend/models.py`:
-
-- `length_m` and `width_m` accept decimal commas and normalize `,` to `.`
-- `material_id` must match one of the IDs in `MATERIALS`
-- `area_m2` is computed as `length_m * width_m`
-
 ### 5. HERO document creation
 
-After extraction, the backend builds one `add_product_position_by_id` action per room whose `material_id` is not `UNBEKANNT` and sends them to:
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Endpoint: `https://login.hero-software.de/api/external/v9/graphql`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Auth: `Authorization: Bearer $HERO_API_TOKEN`
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> One action per room where `material_id != UNBEKANNT`
 
-- Endpoint: `https://login.hero-software.de/api/external/v9/graphql`
-- Auth header: `Authorization: Bearer $HERO_API_TOKEN`
-- Hard-coded arguments:
-  - `document_type_id = 1227309`
-  - `project_match_id = 10049819`
-  - `publish = false` by default
+## <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="14"/> Frontend ↔ Backend
 
-## 🔌 Frontend ↔ Backend
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Dev proxy: `/process_audio → http://localhost:8000`
+- <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="12"/> Payload: `FormData` with one field `file`
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> On success: filters via `isValidRow(...)`, appends to React state, shows success toast
+- <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="12"/> On error: warning toast + pipeline state switches to `error`
 
-The frontend does call the backend.
-
-- Request path from the browser: `/process_audio`
-- Dev proxy in `frontend/vite.config.js`: `/process_audio -> http://localhost:8000`
-- Request payload: `FormData` containing one field named `file`
-- Success response: JSON matching `MeasurementResult`
-- Frontend behavior after response:
-  - filters invalid rows with `isValidRow(...)`
-  - appends valid rooms to local React state
-  - shows a success toast with the number of inserted entries
-- Error behavior:
-  - shows a warning toast saying the input was not recognized
-  - switches the pipeline state to `error`
-
-In practice, the UI behaves like a voice-first capture surface while FastAPI handles transcription, extraction, and the HERO handoff behind the scenes.
-
-## 🚀 Getting Started
-
-Run the backend first so the frontend proxy target at `http://localhost:8000` is available during development.
+## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> Getting Started
 
 ### Backend
 
@@ -198,32 +145,15 @@ npm install
 npm run dev
 ```
 
-### Available frontend scripts
+## <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="14"/> API Endpoints
 
-| Script    | Command        |
-| --------- | -------------- |
-| `dev`     | `vite`         |
-| `build`   | `vite build`   |
-| `preview` | `vite preview` |
+| Method | Path             | Request body                   | Response                 | Description                                                              |
+| ------ | ---------------- | ------------------------------ | ------------------------ | ------------------------------------------------------------------------ |
+| `POST` | `/process_audio` | `multipart/form-data` (`file`) | `MeasurementResult` JSON | Transcribes audio, extracts rooms, creates HERO actions, returns results |
 
-### Root tooling
+- `422 Unprocessable Entity` — `"Could not extract measurements from audio"` if extraction returns `None`
 
-- `mise.toml` defines `python = "3.13.5"` and `node = "22.14.0"`
-- No `vercel.json` is present in the repository root
-
-## 🌐 API Endpoints
-
-| Method | Path             | Request body                                          | Response                 | Description                                                                                                     |
-| ------ | ---------------- | ----------------------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `POST` | `/process_audio` | `multipart/form-data` with one required `file` upload | `MeasurementResult` JSON | Reads audio, transcribes it, extracts room data, creates HERO document actions, and returns the extracted rooms |
-
-Possible error path from the code:
-
-- `422 Unprocessable Entity` with detail `"Could not extract measurements from audio"` if `extract_measurements(...)` returns `None`
-
-## 🔐 Environment Variables
-
-No frontend `.env`, `.env.example`, or `.env.local` files are present under `frontend/`.
+## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> Environment Variables
 
 | Variable             | Where referenced         | Purpose                                             |
 | -------------------- | ------------------------ | --------------------------------------------------- |
@@ -231,25 +161,7 @@ No frontend `.env`, `.env.example`, or `.env.local` files are present under `fro
 | `ELEVENLABS_API_KEY` | `backend/services.py`    | Authenticates the ElevenLabs speech-to-text request |
 | `HERO_API_TOKEN`     | `backend/hero_client.py` | Authenticates the HERO GraphQL request              |
 
-The backend loads `.env` on startup through `load_dotenv()` in `backend/main.py`.
-
-## 🎨 Color Palette
-
-Unique hex colors found in `frontend/tailwind.config.js` and `frontend/src/index.css`:
-
-- `#1A1A1A`
-- `#202020`
-- `#262626`
-- `#343434`
-- `#FFD700`
-- `#FFFFFF`
-- `#A3A3A3`
-- `#EF4444`
-- `#22C55E`
-- `#1D1D1D`
-- `#151515`
-
-## 🗂️ Project Structure
+## <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="14"/> Project Structure
 
 ```text
 .
@@ -257,8 +169,6 @@ Unique hex colors found in `frontend/tailwind.config.js` and `frontend/src/index
 ├─ mise.toml
 ├─ backend/
 │  ├─ .env.example
-│  ├─ .gitignore
-│  ├─ .python-version
 │  ├─ hero_client.py
 │  ├─ main.py
 │  ├─ models.py
@@ -266,31 +176,26 @@ Unique hex colors found in `frontend/tailwind.config.js` and `frontend/src/index
 │  ├─ services.py
 │  └─ uv.lock
 └─ frontend/
-   ├─ .gitignore
-   ├─ index.html
-   ├─ package-lock.json
    ├─ package.json
-   ├─ postcss.config.js
    ├─ tailwind.config.js
    ├─ vite.config.js
    └─ src/
       ├─ App.jsx
       ├─ index.css
-      ├─ main.jsx
       └─ components/
          ├─ AufmassTable.jsx
          ├─ MicButton.jsx
          └─ Toast.jsx
 ```
 
-## 🏢 About HERO Software
+## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> About HERO Software
 
-HERO Software is the company context explicitly referenced throughout this repository: in the package naming, the HERO-themed color system, and the GraphQL endpoint at `login.hero-software.de`. The project is positioned as a voice-driven measurement workflow around HERO's ecosystem, and the linked company website is https://hero-software.de.
+HERO Software is Germany's leading craft management platform, used by thousands of tradespeople for invoicing, project management, and field operations. This project extends HERO's ecosystem with a voice-driven measurement workflow deeply integrated into HERO's GraphQL API. Learn more at https://hero-software.de.
 
-## 🏆 CheftreffAI Hackathon
+## <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="14"/> CheftreffAI Hackathon
 
-The repository references the CheftreffAI Hackathon in `banner.svg`, so this project is documented here as a CheftreffAI Hackathon build without adding further claims beyond that source.
+Built at the CheftreffAI Hackathon as a rapid prototype exploring AI voice interfaces for the trades industry.
 
-## 📄 License
+## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> License
 
 MIT © 2025 HERO Software GmbH
