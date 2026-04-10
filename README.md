@@ -228,6 +228,15 @@ HERO Software is Germany's leading craft management platform, used by thousands 
 
 Built at the CheftreffAI Hackathon as a rapid prototype exploring AI voice interfaces for the trades industry.
 
+## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> Team
+
+- [Justus Mann](https://www.linkedin.com/in/justus-mann-311065402/)
+- [Rebecca Thinnes](https://www.linkedin.com/in/rebecca-thinnes-ba1304389/?locale=de)
+- [Shalo Hasanova](https://www.linkedin.com/in/shahlo-hasanova-a37b4b2a4)
+- [Slava Gladkov](https://www.linkedin.com/in/slawa-gladkov/)
+- [Tim Kanis](https://www.linkedin.com/in/tim-kanis/)
+- [Viktoriia Fadhel](https://www.linkedin.com/in/viktoriia-fadhel-4aa84019a)
+
 ## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> License
 
 MIT © 2025 HERO Software GmbH
