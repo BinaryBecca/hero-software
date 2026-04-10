@@ -136,16 +136,33 @@ list by ID. Include any additional comments mentioned for the room.
 
 ## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> Getting Started
 
-### Backend
+### 1. Configure environment
 
 ```bash
 cd backend
 cp .env.example .env
-uv sync
-uv run python -m uvicorn main:app --reload --port 8000
 ```
 
-### Frontend
+Edit `backend/.env` and set the correct keys for `ELEVENLABS_API_KEY`, `OPENAI_API_KEY`, and `HERO_API_TOKEN`.
+
+### 2. Run both services
+
+```bash
+mise run dev
+```
+
+This starts the backend and frontend together.
+
+### Alternative: run services separately
+
+**Backend:**
+
+```bash
+cd backend
+uv run fastapi dev
+```
+
+**Frontend:**
 
 ```bash
 cd frontend
