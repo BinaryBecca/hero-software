@@ -3,6 +3,7 @@ from decimal import Decimal
 from pydantic import BaseModel, Field, field_validator
 
 
+# TODO: pull materials/products/Artikel from Hero instead of hard coding them
 MATERIALS = [
     {"id": "HA0ZWAOXoAA", "name": "PVC Bodenbelag"},
     {"id": "HA0bFSoDsAA", "name": "Vinyl Bodenbelag"},

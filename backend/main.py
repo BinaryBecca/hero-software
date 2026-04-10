@@ -28,6 +28,7 @@ app.add_middleware(
 @app.post("/process_audio", response_model=MeasurementResult)
 async def process_audio(file: UploadFile = File(...)):
     contents = await file.read()
+    # TODO: move processing to background task, return task ID, create separate endpoints to get results
     transcription = await convert_speech_to_text(contents, file.filename)
     result = await extract_measurements(transcription.text)
 
