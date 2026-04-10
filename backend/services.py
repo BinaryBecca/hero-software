@@ -60,7 +60,7 @@ async def create_quote_on_hero(result: MeasurementResult) -> dict:
             }
         }
         for room in result.rooms
-        if room.material_id != "UNBEKANNT"
+        if room.material_id != "UNBEKANNT" # when creating quote on Hero ignore unknown material
     ]
 
     return await create_document(
