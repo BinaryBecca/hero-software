@@ -4,9 +4,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-from hero_client import create_document
 from models import MeasurementResult
-from services import convert_speech_to_text, extract_measurements
+from services import convert_speech_to_text, extract_measurements, create_quote_on_hero
 
 
 @asynccontextmanager
@@ -28,27 +27,17 @@ app.add_middleware(
 @app.post("/process_audio", response_model=MeasurementResult)
 async def process_audio(file: UploadFile = File(...)):
     contents = await file.read()
+    # TODO: move processing to background task, return task ID, create separate endpoints to get results
     transcription = await convert_speech_to_text(contents, file.filename)
-    result = await extract_measurements(transcription.text)
 
-    if result is None:
+    if not transcription.text.strip():
+        raise HTTPException(status_code=422, detail="Transcription returned empty text")
+
+    measurements = await extract_measurements(transcription.text)
+
+    if measurements is None:
         raise HTTPException(status_code=422, detail="Could not extract measurements from audio")
 
-    actions = [
-        {
-            "add_product_position_by_id": {
-                "product_id": room.material_id,
-                "quantity": float(room.area_m2),
-            }
-        }
-        for room in result.rooms
-        if room.material_id != "UNBEKANNT"
-    ]
+    await create_quote_on_hero(measurements)
 
-    await create_document(
-        document_type_id=1227309,
-        project_match_id=10049819,
-        actions=actions,
-    )
-
-    return result
+    return measurements

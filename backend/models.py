@@ -3,11 +3,12 @@ from decimal import Decimal
 from pydantic import BaseModel, Field, field_validator
 
 
+# TODO: pull materials/products/Artikel from Hero instead of hard coding them
 MATERIALS = [
     {"id": "HA0ZWAOXoAA", "name": "PVC Bodenbelag"},
     {"id": "HA0bFSoDsAA", "name": "Vinyl Bodenbelag"},
     {"id": "HA0Z0--YIAA", "name": "Fliesen"},
-    {"id": "UNBEKANNT", "name": "Unbekannt"},
+    {"id": "UNBEKANNT", "name": "Unbekannt"}, # fallback if material is not identified from speech
 ]
 
 
@@ -47,7 +48,7 @@ class Room(BaseModel):
     )
     material_id: str = Field(
         description="ID of the material from the provided materials list",
-        examples=["HA0ZWAOXoAA", "PLACEHOLDER_FLIESEN"],
+        examples=["HA0ZWAOXoAA", "UNBEKANNT"],
     )
     comment: str | None = Field(
         default=None,
