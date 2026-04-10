@@ -4,7 +4,7 @@ async function submitAudio(blob) {
   const formData = new FormData();
   formData.append('file', blob, 'recording.webm');
 
-  const response = await fetch('/process_audio', {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/process_audio`, {
     method: 'POST',
     body: formData,
   });
