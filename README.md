@@ -173,10 +173,6 @@ npm install
 npm run dev
 ```
 
-## <img src="https://img.shields.io/badge/●-FFD700?style=flat-square&color=FFD700" height="14"/> Staging
-
-https://m3kiohfsh9frqc2g739igu6v.node3.zyklum.de/
-
 ## <img src="https://img.shields.io/badge/●-1A1A1A?style=flat-square&color=1A1A1A" height="14"/> API Endpoints
 
 | Method | Path             | Request body                   | Response                 | Description                                                              |
