@@ -5,7 +5,7 @@ import httpx
 from openai import AsyncOpenAI
 
 from hero_client import create_document
-from models import MATERIALS, TranscriptionResult, MeasurementResult
+from models import MATERIALS, MATERIAL_NAME_BY_ID, TranscriptionResult, MeasurementResult
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,48 @@ async def extract_measurements(transcript: str) -> MeasurementResult | None:
     result = response.output_parsed
     logger.info("LLM extracted data: %s", result)
     return result
+
+
+def build_confirmation_text(result: MeasurementResult) -> str:
+    n = len(result.rooms)
+    if n == 1:
+        intro = "Es wurde 1 Raum erfasst: "
+    else:
+        intro = f"Es wurden {n} Räume erfasst: "
+
+    parts = []
+    total_area = 0
+    for room in result.rooms:
+        material_name = MATERIAL_NAME_BY_ID.get(room.material_id, "Unbekannt")
+        area = room.area_m2
+        total_area += area
+        part = f"{room.name}, {room.length_m} mal {room.width_m} Meter, {material_name}, {area} Quadratmeter"
+        if room.comment:
+            part += f", Hinweis: {room.comment}"
+        parts.append(part)
+
+    return intro + ". ".join(parts) + f". Gesamtfläche: {total_area} Quadratmeter."
+
+
+async def generate_confirmation_audio(text: str) -> bytes:
+    voice_id = os.environ.get("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")
+    tts_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+
+    headers = {
+        "xi-api-key": os.environ["ELEVENLABS_API_KEY"],
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "text": text,
+        "model_id": "eleven_multilingual_v2",
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(tts_url, headers=headers, json=payload, timeout=30.0)
+        response.raise_for_status()
+
+    return response.content
 
 
 async def create_quote_on_hero(result: MeasurementResult) -> dict:
